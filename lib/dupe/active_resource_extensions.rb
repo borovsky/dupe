@@ -12,7 +12,7 @@ module ActiveResource #:nodoc:
 
       # if the request threw an exception
       rescue ActiveResource::InvalidRequestError
-        mocked_response = Dupe.network.request(:get, path)
+        mocked_response = Dupe.network.request(:get, path, headers)
         ActiveResource::HttpMock.respond_to(false) do |mock|
           mock.get(path, headers, mocked_response)
         end
@@ -41,7 +41,7 @@ module ActiveResource #:nodoc:
         end
         resource_hash = {} unless resource_hash.kind_of?(Hash)
         begin
-          mocked_response, new_path = Dupe.network.request(:post, path, resource_hash)
+          mocked_response, new_path = Dupe.network.request(:post, path, headers, resource_hash)
           error = false
         rescue Dupe::UnprocessableEntity => e
           mocked_response =
@@ -84,7 +84,7 @@ module ActiveResource #:nodoc:
 
         begin
           error = false
-          mocked_response, path = Dupe.network.request(:put, path, resource_hash)
+          mocked_response, path = Dupe.network.request(:put, path, headers, resource_hash)
         rescue Dupe::UnprocessableEntity => e
           mocked_response =
             case Dupe.format
@@ -115,7 +115,7 @@ module ActiveResource #:nodoc:
       begin
         response = request(:delete, path, build_request_headers(headers, :delete, self.site.merge(path)))
       rescue ActiveResource::InvalidRequestError
-        Dupe.network.request(:delete, path)
+        Dupe.network.request(:delete, path, headers)
 
         ActiveResource::HttpMock.respond_to(false) do |mock|
           mock.delete(path, headers, nil, 200)

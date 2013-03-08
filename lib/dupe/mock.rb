@@ -20,7 +20,7 @@ class Dupe
         url_pattern =~ url ? true : false
       end
 
-      def mocked_response(url, body = nil)
+      def mocked_response(url, headers, body = nil)
         raise(
           StandardError,
           "Tried to mock a response to a non-matched url! This should never occur. My pattern: #{@url_pattern}. Url: #{url}"
@@ -28,6 +28,7 @@ class Dupe
 
         grouped_results = url_pattern.match(url)[1..-1]
         grouped_results << body if body
+        grouped_results << headers
 
         resp = @response.call *grouped_results
         process_response(resp, url)

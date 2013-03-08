@@ -28,7 +28,7 @@ describe "Mock Definition Methods" do
         Dupe.network.mocks[:get].last.should == mock
         Dupe.network.mocks[:get].last.url_pattern.should == %r{/books/([^&]+)\.xml}
         book = Dupe.find(:book)
-        Dupe.network.request(:get, '/books/rooby.xml').should == book.make_safe.to_xml(:root => 'book')
+        Dupe.network.request(:get, '/books/rooby.xml', {}).should == book.make_safe.to_xml(:root => 'book')
       end
     end
 
@@ -54,7 +54,8 @@ describe "Mock Definition Methods" do
         book_post = Dupe.create(:book, {:title => "Rooby", :label => "rooby"})
         book_post.delete(:id)
         book_response = Dupe.create(:book, {:title => "Rooby", :label => "rooby"})
-        Dupe.network.request(:post, '/books.xml', book_post).should == [Dupe.find(:book) {|b| b.id == 4}.make_safe.to_xml(:root => 'book'), "/books/4.xml"]
+        Dupe.network.request(:post, '/books.xml', {}, book_post).should ==
+          [Dupe.find(:book) {|b| b.id == 4}.make_safe.to_xml(:root => 'book'), "/books/4.xml"]
       end
     end
   end
@@ -86,7 +87,8 @@ describe "Mock Definition Methods" do
         Dupe.network.mocks[:get].last.should == mock
         Dupe.network.mocks[:get].last.url_pattern.should == %r{/books/([^&]+)\.json}
         book = Dupe.find(:book)
-        Dupe.network.request(:get, '/books/rooby.json').should == book.make_safe.to_json(:root => 'book')
+        Dupe.network.request(:get, '/books/rooby.json', {}).should ==
+          book.make_safe.to_json(:root => 'book')
       end
     end
 
@@ -112,7 +114,8 @@ describe "Mock Definition Methods" do
         book_post = Dupe.create(:book, {:title => "Rooby", :label => "rooby"})
         book_post.delete(:id)
         book_response = Dupe.create(:book, {:title => "Rooby", :label => "rooby"})
-        Dupe.network.request(:post, '/books.json', book_post).should == [Dupe.find(:book) {|b| b.id == 4}.make_safe.to_json(:root => 'book'), "/books/4.json"]
+        Dupe.network.request(:post, '/books.json', {},book_post).should ==
+          [Dupe.find(:book) {|b| b.id == 4}.make_safe.to_json(:root => 'book'), "/books/4.json"]
       end
     end
   end

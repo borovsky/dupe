@@ -456,12 +456,12 @@ describe Dupe do
         find_all_mock = Dupe.network.mocks[:get].first
         find_all_mock.class.should == Dupe::Network::GetMock
         find_all_mock.url_pattern.should == %r{^/books\.(?:xml|json)$}
-        find_all_mock.mocked_response('/books.xml').should == Dupe.find(:books).to_xml(:root => 'books')
+        find_all_mock.mocked_response('/books.xml', {}).should == Dupe.find(:books).to_xml(:root => 'books')
 
         find_one_mock = Dupe.network.mocks[:get].last
         find_one_mock.class.should == Dupe::Network::GetMock
         find_one_mock.url_pattern.should == %r{^/books/(\d+)\.(?:xml|json)$}
-        find_one_mock.mocked_response('/books/1.xml').should == Dupe.find(:book).to_xml(:root => 'book')
+        find_one_mock.mocked_response('/books/1.xml', {}).should == Dupe.find(:book).to_xml(:root => 'book')
       end
 
       it "should add a POST (create resource) mock to the network" do
@@ -473,7 +473,7 @@ describe Dupe do
         post_mock = Dupe.network.mocks[:post].first
         post_mock.class.should == Dupe::Network::PostMock
         post_mock.url_pattern.should == %r{^/books\.(?:xml|json)$}
-        resp, url = post_mock.mocked_response('/books.xml', {:title => "Rooby"})
+        resp, url = post_mock.mocked_response('/books.xml', {}, {:title => "Rooby"})
         Hash.from_xml(resp).should == Hash.from_xml(Dupe.find(:book).to_xml(:root => 'book'))
         url.should == "/books/1.xml"
       end
@@ -487,7 +487,7 @@ describe Dupe do
         put_mock = Dupe.network.mocks[:put].first
         put_mock.class.should == Dupe::Network::PutMock
         put_mock.url_pattern.should == %r{^/books/(\d+)\.(?:xml|json)$}
-        resp, url = put_mock.mocked_response('/books/1.xml', {:title => "Rails!"})
+        resp, url = put_mock.mocked_response('/books/1.xml', {}, {:title => "Rails!"})
         resp.should == nil
         url.should == "/books/1.xml"
         book.title.should == "Rails!"
@@ -515,12 +515,12 @@ describe Dupe do
         find_all_mock = Dupe.network.mocks[:get].first
         find_all_mock.class.should == Dupe::Network::GetMock
         find_all_mock.url_pattern.should == %r{^/book_services/authors\.(?:xml|json)$}
-        find_all_mock.mocked_response('/book_services/authors.xml').should == Dupe.find(:authors).to_xml(:root => 'authors')
+        find_all_mock.mocked_response('/book_services/authors.xml', {}).should == Dupe.find(:authors).to_xml(:root => 'authors')
 
         find_one_mock = Dupe.network.mocks[:get].last
         find_one_mock.class.should == Dupe::Network::GetMock
         find_one_mock.url_pattern.should == %r{^/book_services/authors/(\d+)\.(?:xml|json)$}
-        find_one_mock.mocked_response('/book_services/authors/1.xml').should == Dupe.find(:author).to_xml(:root => 'author')
+        find_one_mock.mocked_response('/book_services/authors/1.xml', {}).should == Dupe.find(:author).to_xml(:root => 'author')
       end
     end
 
@@ -538,12 +538,12 @@ describe Dupe do
         find_all_mock = Dupe.network.mocks[:get].first
         find_all_mock.class.should == Dupe::Network::GetMock
         find_all_mock.url_pattern.should == %r{^/books\.(?:xml|json)$}
-        find_all_mock.mocked_response('/books.json').should == Dupe.find(:books).to_json(:root => 'books')
+        find_all_mock.mocked_response('/books.json', {}).should == Dupe.find(:books).to_json(:root => 'books')
 
         find_one_mock = Dupe.network.mocks[:get].last
         find_one_mock.class.should == Dupe::Network::GetMock
         find_one_mock.url_pattern.should == %r{^/books/(\d+)\.(?:xml|json)$}
-        find_one_mock.mocked_response('/books/1.json').should == Dupe.find(:book).to_json(:root => 'book')
+        find_one_mock.mocked_response('/books/1.json', {}).should == Dupe.find(:book).to_json(:root => 'book')
       end
 
       it "should add a POST (create resource) mock to the network" do
@@ -597,12 +597,12 @@ describe Dupe do
         find_all_mock = Dupe.network.mocks[:get].first
         find_all_mock.class.should == Dupe::Network::GetMock
         find_all_mock.url_pattern.should == %r{^/book_services/authors\.(?:xml|json)$}
-        find_all_mock.mocked_response('/book_services/authors.json').should == Dupe.find(:authors).to_json(:root => 'authors')
+        find_all_mock.mocked_response('/book_services/authors.json', {}).should == Dupe.find(:authors).to_json(:root => 'authors')
 
         find_one_mock = Dupe.network.mocks[:get].last
         find_one_mock.class.should == Dupe::Network::GetMock
         find_one_mock.url_pattern.should == %r{^/book_services/authors/(\d+)\.(?:xml|json)$}
-        find_one_mock.mocked_response('/book_services/authors/1.json').should == Dupe.find(:author).to_json(:root => 'author')
+        find_one_mock.mocked_response('/book_services/authors/1.json', {}).should == Dupe.find(:author).to_json(:root => 'author')
       end
     end
   end

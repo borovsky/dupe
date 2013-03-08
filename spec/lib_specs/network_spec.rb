@@ -25,26 +25,27 @@ describe Dupe::Network do
 
     it "should require a valid REST verb" do
       proc { @network.request }.should raise_error
-      proc { @network.request :invalid_rest_verb, '/some_url' }.should raise_error(Dupe::Network::UnknownRestVerbError)
-      proc { @network.request :get, '/some_url' }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
-      proc { @network.request :post, '/some_url', 'some body' }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
-      proc { @network.request :put, '/some_url' }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
-      proc { @network.request :delete, '/some_url' }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
+      proc { @network.request :invalid_rest_verb, '/some_url', {} }.should raise_error(Dupe::Network::UnknownRestVerbError)
+      proc { @network.request :get, '/some_url', {} }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
+      proc { @network.request :post, '/some_url', {}, 'some body' }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
+      proc { @network.request :put, '/some_url', {} }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
+      proc { @network.request :delete, '/some_url', {} }.should_not raise_error(Dupe::Network::UnknownRestVerbError)
     end
 
-    it "should require a URL" do
+    it "should require a URL and headers" do
       proc { @network.request :get }.should raise_error(ArgumentError)
-      proc { @network.request :get, 'some_url'}.should_not raise_error(ArgumentError)
-      proc { @network.request :post, 'some_url', 'some body'}.should_not raise_error(ArgumentError)
-      proc { @network.request :put, 'some_url'}.should_not raise_error(ArgumentError)
-      proc { @network.request :delete, 'some_url'}.should_not raise_error(ArgumentError)
+      proc { @network.request :get, "some_url"}.should raise_error(ArgumentError)
+      proc { @network.request :get, 'some_url', {}}.should_not raise_error(ArgumentError)
+      proc { @network.request :post, 'some_url', {}, 'some body'}.should_not raise_error(ArgumentError)
+      proc { @network.request :put, 'some_url', {}}.should_not raise_error(ArgumentError)
+      proc { @network.request :delete, 'some_url', {}}.should_not raise_error(ArgumentError)
     end
 
     it "should raise an exception if the network has no mocks that match the url" do
-      proc { @network.request(:get, '/some_url')}.should raise_error(Dupe::Network::RequestNotFoundError)
-      proc { @network.request(:post, '/some_url', 'some body')}.should raise_error(Dupe::Network::RequestNotFoundError)
-      proc { @network.request(:put, '/some_url')}.should raise_error(Dupe::Network::RequestNotFoundError)
-      proc { @network.request(:delete, '/some_url')}.should raise_error(Dupe::Network::RequestNotFoundError)
+      proc { @network.request(:get, '/some_url', {})}.should raise_error(Dupe::Network::RequestNotFoundError)
+      proc { @network.request(:post, '/some_url', {}, 'some body')}.should raise_error(Dupe::Network::RequestNotFoundError)
+      proc { @network.request(:put, '/some_url', {})}.should raise_error(Dupe::Network::RequestNotFoundError)
+      proc { @network.request(:delete, '/some_url', {})}.should raise_error(Dupe::Network::RequestNotFoundError)
     end
 
     describe "using xml" do
@@ -55,10 +56,10 @@ describe Dupe::Network do
 
       it "should return the appropriate mock response if a mock matches the url" do
         @network.define_service_mock :get, %r{/greeting$}, proc { "hello" }
-        @network.request(:get, '/greeting').should == 'hello'
+        @network.request(:get, '/greeting', {}).should == 'hello'
 
         @network.define_service_mock :post, %r{/greeting$}, proc { |post_data| Dupe.create(:greeting, post_data) }
-        resp, url = @network.request(:post, '/greeting', {} )
+        resp, url = @network.request(:post, '/greeting', {}, {} )
         resp.should == Dupe.find(:greeting).make_safe.to_xml(:root => 'greeting')
         url.should == "/greetings/1.xml"
       end
@@ -72,10 +73,10 @@ describe Dupe::Network do
 
       it "should return the appropriate mock response if a mock matches the url" do
         @network.define_service_mock :get, %r{/greeting$}, proc { "hello" }
-        @network.request(:get, '/greeting').should == 'hello'
+        @network.request(:get, '/greeting', {}).should == 'hello'
 
         @network.define_service_mock :post, %r{/greeting$}, proc { |post_data| Dupe.create(:greeting, post_data) }
-        resp, url = @network.request(:post, '/greeting', {} )
+        resp, url = @network.request(:post, '/greeting', {}, {} )
         resp.should == Dupe.find(:greeting).make_safe.to_json(:root => 'greeting')
         url.should == "/greetings/1.json"
       end

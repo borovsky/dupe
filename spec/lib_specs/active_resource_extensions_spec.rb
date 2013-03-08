@@ -17,7 +17,8 @@ describe ActiveResource::Connection do
       end
 
       it "should pass a request off to the Dupe network if the original request failed" do
-        Dupe.network.should_receive(:request).with(:get, '/books.xml').once.and_return(Dupe.find(:books).to_xml(:root => 'books'))
+        Dupe.network.should_receive(:request).with(:get, '/books.xml', {}).once.
+          and_return(Dupe.find(:books).to_xml(:root => 'books'))
         books = Book.find(:all)
       end
 
@@ -40,7 +41,8 @@ describe ActiveResource::Connection do
       end
 
       it "should pass a request off to the Dupe network if the original request failed" do
-        Dupe.network.should_receive(:request).with(:post, '/books.xml', Hash.from_xml(@book.to_xml(:root => 'book'))["book"] ).once
+        Dupe.network.should_receive(:request).
+          with(:post, '/books.xml', {}, Hash.from_xml(@book.to_xml(:root => 'book'))["book"] ).once
         book = Book.create({:label => 'rooby', :title => 'Rooby'})
       end
 
@@ -95,7 +97,10 @@ describe ActiveResource::Connection do
       end
 
       it "should pass a request off to the Dupe network if the original request failed" do
-        Dupe.network.should_receive(:request).with(:put, '/books/1.xml', Hash.from_xml(@book.merge(:title => "Rails!").to_xml(:root => 'book'))["book"].symbolize_keys!).once.and_return([nil, '/books/1.xml'])
+        Dupe.network.should_receive(:request).
+          with(:put, '/books/1.xml', {}, Hash.from_xml(@book.merge(:title => "Rails!").
+                                                       to_xml(:root => 'book'))["book"].
+               symbolize_keys!).once.and_return([nil, '/books/1.xml'])
         @ar_book.title = 'Rails!'
         @ar_book.save
       end
@@ -170,7 +175,7 @@ describe ActiveResource::Connection do
       end
 
       it "should pass a request off to the Dupe network if the original request failed" do
-        Dupe.network.should_receive(:request).with(:delete, '/books/1.xml').once
+        Dupe.network.should_receive(:request).with(:delete, '/books/1.xml', {}).once
         @ar_book.destroy
       end
 
@@ -206,7 +211,8 @@ describe ActiveResource::Connection do
       end
 
       it "should pass a request off to the Dupe network if the original request failed" do
-        Dupe.network.should_receive(:request).with(:get, '/books.json').once.and_return(Dupe.find(:books).to_json(:root => 'books'))
+        Dupe.network.should_receive(:request).with(:get, '/books.json', {}).once.
+          and_return(Dupe.find(:books).to_json(:root => 'books'))
         books = Book.find(:all)
       end
 
@@ -229,7 +235,8 @@ describe ActiveResource::Connection do
       end
 
       it "should pass a request off to the Dupe network if the original request failed" do
-        Dupe.network.should_receive(:request).with(:post, '/books.json', Hash.from_json(@book.to_json(:root => 'book')) ).once
+        Dupe.network.should_receive(:request).
+          with(:post, '/books.json', {}, Hash.from_json(@book.to_json(:root => 'book')) ).once
         book = Book.create({:label => 'rooby', :title => 'Rooby'})
       end
 
@@ -281,7 +288,10 @@ describe ActiveResource::Connection do
       end
 
       it "should pass a request off to the Dupe network if the original request failed" do
-        Dupe.network.should_receive(:request).with(:put, '/books/1.json', Hash.from_json(@book.merge(:title => "Rails!").to_json(:root => 'book')).symbolize_keys!).once.and_return([nil, '/books/1.json'])
+        Dupe.network.should_receive(:request).
+          with(:put, '/books/1.json', {}, Hash.from_json(@book.merge(:title => "Rails!").
+                                                         to_json(:root => 'book')).symbolize_keys!).
+          once.and_return([nil, '/books/1.json'])
         @ar_book.title = 'Rails!'
         @ar_book.save
       end
@@ -357,7 +367,7 @@ describe ActiveResource::Connection do
       end
 
       it "should pass a request off to the Dupe network if the original request failed" do
-        Dupe.network.should_receive(:request).with(:delete, '/books/1.json').once
+        Dupe.network.should_receive(:request).with(:delete, '/books/1.json', {}).once
         @ar_book.destroy
       end
 
