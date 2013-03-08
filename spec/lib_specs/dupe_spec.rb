@@ -5,13 +5,13 @@ describe Dupe do
     Dupe.reset
   end
 
-  describe "#sequences" do 
+  describe "#sequences" do
     it "should be empty on initialization" do
       Dupe.sequences.should == {}
     end
   end
 
-  describe "#sequence" do 
+  describe "#sequence" do
     it "should require a sequence name and a block" do
       proc {Dupe.sequence}.should raise_error(ArgumentError)
       proc {Dupe.sequence :name}.should_not raise_error
@@ -32,8 +32,8 @@ describe Dupe do
     end
   end
 
-  describe "#next" do 
-    it "should require a sequence name" do 
+  describe "#next" do
+    it "should require a sequence name" do
       Dupe.sequence :email do |n|
         "email-#{n}@address.com"
       end
@@ -87,7 +87,7 @@ describe Dupe do
       Dupe.database.tables.length.should == 2
       Dupe.reset_database
       Dupe.database.tables.should be_empty
-    end    
+    end
   end
 
   describe "reset_network" do
@@ -97,7 +97,7 @@ describe Dupe do
       Dupe.network.mocks[:get].should_not be_empty
       Dupe.reset_network
       Dupe.network.mocks.values.inject(false) {|b,v| b || !v.empty?}.should == false
-    end    
+    end
   end
 
   describe "create" do
@@ -146,10 +146,10 @@ describe Dupe do
       Dupe.database.tables[:book].should_not be_empty
       Dupe.database.tables[:book].length.should == 2
       Dupe.database.tables[:book].first.should == @books.first
-      Dupe.database.tables[:book].last.should == @books.last      
+      Dupe.database.tables[:book].last.should == @books.last
     end
 
-    it "should symbolize hash keys to keep from duplicating column names" do 
+    it "should symbolize hash keys to keep from duplicating column names" do
       b = Dupe.create :book, 'title' => 'War And Peace', :title => 'War And Peace'
       b.title.should == 'War And Peace'
       b[:title].should == 'War And Peace'
@@ -190,7 +190,7 @@ describe Dupe do
     before do
       Dupe.define :book do |book|
         book.uniquify :title, :author, :genre
-        
+
         book.after_create do |b|
           b.label = b.title.downcase.gsub(/\ +/, '-') unless b.label
         end
@@ -266,10 +266,10 @@ describe Dupe do
 
     it "should accept procs on stubs" do
       Dupe.database.tables[:author].should be_nil
-      authors = 
+      authors =
       Dupe.stub(
-        2, 
-        :authors, 
+        2,
+        :authors,
         :like => {
           :name => proc {|n| "Author #{n}"},
           :bio => proc {|n| "Author #{n}'s bio"}
@@ -384,7 +384,7 @@ describe Dupe do
         Dupe.define :book
       }.should_not raise_error
     end
-  
+
     # Dupe.define :model_name do |attrs|
     #   attrs.attr1 'Default Value'
     #   attrs.attr2 do |value|
@@ -397,10 +397,10 @@ describe Dupe do
         end
       }.should raise_error(
         ArgumentError,
-        "Unknown Dupe.define parameter format. Please consult the API" + 
+        "Unknown Dupe.define parameter format. Please consult the API" +
         " for information on how to use Dupe.define"
       )
-    
+
       proc {
         Dupe.define :book do |attrs|
           attrs.author 'Anon'
@@ -408,7 +408,7 @@ describe Dupe do
         end
       }.should_not raise_error
     end
-    
+
     it "should create a model and a schema with the desired definition" do
       Dupe.define :book do |attrs|
         attrs.author 'Anon'
@@ -419,7 +419,7 @@ describe Dupe do
           "transformed #{value}"
         end
       end
-      
+
       Dupe.models.length.should == 1
       Dupe.models[:book].schema.attribute_templates[:author].name.should == :author
       Dupe.models[:book].schema.attribute_templates[:author].default.should == 'Anon'
@@ -432,7 +432,7 @@ describe Dupe do
       Dupe.models[:book].schema.attribute_templates[:genre].default.should be_kind_of(Proc)
       Dupe.models[:book].schema.attribute_templates[:genre].default.call.should match(/^Unknown\d$/)
     end
-    
+
     it "should add a table to the database" do
       Dupe.database.tables.length.should == 0
       Dupe.database.tables[:book].should be_nil
@@ -441,8 +441,8 @@ describe Dupe do
       Dupe.database.tables[:book].should_not be_nil
       Dupe.database.tables[:book].should == []
     end
-    
-    describe "using xml" do 
+
+    describe "using xml" do
       before do
         Dupe.format = ActiveResource::Formats::XmlFormat
       end
@@ -452,12 +452,12 @@ describe Dupe do
         Dupe.create :book
         Dupe.network.mocks[:get].should_not be_empty
         Dupe.network.mocks[:get].length.should == 2
-        
+
         find_all_mock = Dupe.network.mocks[:get].first
         find_all_mock.class.should == Dupe::Network::GetMock
         find_all_mock.url_pattern.should == %r{^/books\.(?:xml|json)$}
         find_all_mock.mocked_response('/books.xml').should == Dupe.find(:books).to_xml(:root => 'books')
-        
+
         find_one_mock = Dupe.network.mocks[:get].last
         find_one_mock.class.should == Dupe::Network::GetMock
         find_one_mock.url_pattern.should == %r{^/books/(\d+)\.(?:xml|json)$}
@@ -504,42 +504,42 @@ describe Dupe do
         delete_mock.url_pattern.should == %r{^/books/(\d+)\.(?:xml|json)$}
       end
 
-      
+
       it "should honor ActiveResource site prefix's for the find(:all) and find(<id>) mocks" do
         Dupe.network.mocks[:get].should be_empty
         class Author < ActiveResource::Base; self.site='http://somewhere.com/book_services'; end
         Dupe.create :author
         Dupe.network.mocks[:get].should_not be_empty
         Dupe.network.mocks[:get].length.should == 2
-        
+
         find_all_mock = Dupe.network.mocks[:get].first
         find_all_mock.class.should == Dupe::Network::GetMock
         find_all_mock.url_pattern.should == %r{^/book_services/authors\.(?:xml|json)$}
         find_all_mock.mocked_response('/book_services/authors.xml').should == Dupe.find(:authors).to_xml(:root => 'authors')
-        
+
         find_one_mock = Dupe.network.mocks[:get].last
         find_one_mock.class.should == Dupe::Network::GetMock
         find_one_mock.url_pattern.should == %r{^/book_services/authors/(\d+)\.(?:xml|json)$}
         find_one_mock.mocked_response('/book_services/authors/1.xml').should == Dupe.find(:author).to_xml(:root => 'author')
-      end    
+      end
     end
 
     describe "using json" do
       before do
         Dupe.format = ActiveResource::Formats::JsonFormat
       end
-      
+
       it "should add find(:all) and find(<id>) mocks to the network" do
         Dupe.network.mocks[:get].should be_empty
         Dupe.create :book
         Dupe.network.mocks[:get].should_not be_empty
         Dupe.network.mocks[:get].length.should == 2
-        
+
         find_all_mock = Dupe.network.mocks[:get].first
         find_all_mock.class.should == Dupe::Network::GetMock
         find_all_mock.url_pattern.should == %r{^/books\.(?:xml|json)$}
         find_all_mock.mocked_response('/books.json').should == Dupe.find(:books).to_json(:root => 'books')
-        
+
         find_one_mock = Dupe.network.mocks[:get].last
         find_one_mock.class.should == Dupe::Network::GetMock
         find_one_mock.url_pattern.should == %r{^/books/(\d+)\.(?:xml|json)$}
@@ -586,24 +586,24 @@ describe Dupe do
         delete_mock.url_pattern.should == %r{^/books/(\d+)\.(?:xml|json)$}
       end
 
-      
+
       it "should honor ActiveResource site prefix's for the find(:all) and find(<id>) mocks" do
         Dupe.network.mocks[:get].should be_empty
         class Author < ActiveResource::Base; self.site='http://somewhere.com/book_services'; end
         Dupe.create :author
         Dupe.network.mocks[:get].should_not be_empty
         Dupe.network.mocks[:get].length.should == 2
-        
+
         find_all_mock = Dupe.network.mocks[:get].first
         find_all_mock.class.should == Dupe::Network::GetMock
         find_all_mock.url_pattern.should == %r{^/book_services/authors\.(?:xml|json)$}
         find_all_mock.mocked_response('/book_services/authors.json').should == Dupe.find(:authors).to_json(:root => 'authors')
-        
+
         find_one_mock = Dupe.network.mocks[:get].last
         find_one_mock.class.should == Dupe::Network::GetMock
         find_one_mock.url_pattern.should == %r{^/book_services/authors/(\d+)\.(?:xml|json)$}
         find_one_mock.mocked_response('/book_services/authors/1.json').should == Dupe.find(:author).to_json(:root => 'author')
-      end    
+      end
     end
   end
 end
