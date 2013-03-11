@@ -25,8 +25,8 @@ describe "Mock Definition Methods" do
         end
 
         Dupe.network.mocks[:get].length.should == 3
-        Dupe.network.mocks[:get].last.should == mock
-        Dupe.network.mocks[:get].last.url_pattern.should == %r{/books/([^&]+)\.xml}
+        Dupe.network.mocks[:get].first.should == mock
+        Dupe.network.mocks[:get].first.url_pattern.should == %r{/books/([^&]+)\.xml}
         book = Dupe.find(:book)
         Dupe.network.request(:get, '/books/rooby.xml', {}).should == book.make_safe.to_xml(:root => 'book')
       end
@@ -84,8 +84,8 @@ describe "Mock Definition Methods" do
         end
 
         Dupe.network.mocks[:get].length.should == 3
-        Dupe.network.mocks[:get].last.should == mock
-        Dupe.network.mocks[:get].last.url_pattern.should == %r{/books/([^&]+)\.json}
+        Dupe.network.mocks[:get].first.should == mock
+        Dupe.network.mocks[:get].first.url_pattern.should == %r{/books/([^&]+)\.json}
         book = Dupe.find(:book)
         Dupe.network.request(:get, '/books/rooby.json', {}).should ==
           book.make_safe.to_json(:root => 'book')
