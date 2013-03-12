@@ -329,7 +329,7 @@ Voila! When the _Book_ class was unable to find the book with id 1, it asked Dup
   irb# puts Dupe.network.log.pretty_print
   
     Logged Requests:
-      Request: GET /books/1.xml
+      Request: GET /books/1.xml {}
       Response:
         <?xml version="1.0" encoding="UTF-8"?>
         <book>
@@ -345,7 +345,7 @@ Similarly:
   irb# puts Dupe.network.log.pretty_print
   
     Logged Requests:
-      Request: GET /books.xml
+      Request: GET /books.xml {}
       Response:
         <?xml version="1.0" encoding="UTF-8"?>
         <books type="array">
@@ -389,7 +389,7 @@ Obviously, Dupe had no way of anticipating this possibility. However, you can cr
   irb# puts Dupe.network.log.pretty_print
 
     Logged Requests:
-      Request: GET /authors/published.xml
+      Request: GET /authors/published.xml {}
       Response:
         <?xml version="1.0" encoding="UTF-8"?>
         <authors type="array">
@@ -433,7 +433,7 @@ We can mock this with the following:
   irb# puts Dupe.network.log.pretty_print
   
     Logged Requests:
-      Request: GET /authors.xml?published=true
+      Request: GET /authors.xml?published=true {}
       Response:
         <?xml version="1.0" encoding="UTF-8"?>
         <authors type="array">
@@ -444,7 +444,7 @@ We can mock this with the following:
           </author>
         </authors>
 
-      Request: GET /authors.xml?published=false
+      Request: GET /authors.xml?published=false {}
       Response:
         <?xml version="1.0" encoding="UTF-8"?>
         <authors type="array">
@@ -454,6 +454,7 @@ We can mock this with the following:
             <id type="integer">2</id>
           </author>
         </authors>
+
 
 ===POST requests
 
@@ -630,6 +631,19 @@ And also, as you might have guessed, you can override the default DELETE interce
   irb# a.destroy
     ==> "deleting the book with id 1"
 
+===Request headers check in mocks
+
+You can also access request headers. This headers passed as last block
+parameter to your mock:
+
+  irb# Get %r{/authors\.xml\?published=(true|false)$} do |published, headers|
+   --#   raise ActiveResource::UnauthorizedAccess unless headers["Auth"]
+   --#   if published == 'true'
+   --#     Dupe.find(:authors) {|a| a.published == true}
+   --#   else
+   --#     Dupe.find(:authors) {|a| a.published == false}
+   --#   end
+   --# end
 
 == More
 
