@@ -5,14 +5,14 @@ class Dupe
       attr_reader :requests    #:nodoc:
       
       class Request     #:nodoc:
-        attr_reader :verb, :path, :response_body
+        attr_reader :verb, :path, :headers, :response_body
         
-        def initialize(verb, path, response_body)
-          @verb, @path, @response_body = verb, path, response_body
+        def initialize(verb, path, headers, response_body)
+          @verb, @path, @headers, @response_body = verb, path, headers, response_body
         end
         
         def pretty_print
-          "Request: #{@verb.to_s.upcase} #{@path}\n" +
+          "Request: #{@verb.to_s.upcase} #{@path} #{@headers}\n" +
           "Response:\n" + @response_body.indent
         end
       end
@@ -21,9 +21,9 @@ class Dupe
         @requests = []
       end
       
-      def add_request(verb, path, response_body='')     #:nodoc:
+      def add_request(verb, path, headers, response_body='')     #:nodoc:
         validate_request_type verb
-        @requests << Request.new(verb, path, response_body)
+        @requests << Request.new(verb, path, headers, response_body)
       end
       
       def pretty_print
