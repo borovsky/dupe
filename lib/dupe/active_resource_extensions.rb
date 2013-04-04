@@ -39,7 +39,6 @@ module ActiveResource #:nodoc:
         unless body.blank?
           resource_hash = Dupe.format.decode(body)
         end
-        resource_hash = {} unless resource_hash.kind_of?(Hash)
         begin
           mocked_response, new_path = Dupe.network.request(:post, path, headers, resource_hash)
           error = false
@@ -79,8 +78,7 @@ module ActiveResource #:nodoc:
         unless body.blank?
           resource_hash = Dupe.format.decode(body)
         end
-        resource_hash = {} unless resource_hash.kind_of?(Hash)
-        resource_hash.symbolize_keys!
+        resource_hash.symbolize_keys! if resource_hash.kind_of?(Hash)
 
         begin
           error = false
