@@ -47,13 +47,15 @@ describe Dupe::Network::GetMock do
           response = proc {|id| Dupe.find(:book) {|b| b.id == id.to_i}}
           book = Dupe.create :book
           mock = Dupe::Network::GetMock.new url_pattern, response
-          mock.mocked_response('/books/1.xml', {}).should == book.to_xml(:root => 'book')
+          mock.mocked_response('/books/1.xml', {}).should ==
+            build_response(book.to_xml(:root => 'book'), 200)
 
           proc { mock.mocked_response('/books/2.xml', {}) }.should raise_error(Dupe::Network::GetMock::ResourceNotFoundError)
 
           Dupe.define :author
           mock = Dupe::Network::GetMock.new %r{/authors\.xml$}, proc {Dupe.find :authors}
-          mock.mocked_response('/authors.xml', {}).should == [].to_xml(:root => 'results')
+          mock.mocked_response('/authors.xml', {}).should ==
+            build_response([].to_xml(:root => 'results'), 200)
         end
 
         it "should add a request to the Dupe::Network#log" do
@@ -81,7 +83,8 @@ describe Dupe::Network::GetMock do
         it "should convert the empty array to an xml array record set with root 'results'" do
           Dupe.define :author
           mock = Dupe::Network::GetMock.new %r{/authors\.xml$}, proc {Dupe.find :authors}
-          mock.mocked_response('/authors.xml', {}).should == [].to_xml(:root => 'results')
+          mock.mocked_response('/authors.xml', {}).should ==
+            build_response([].to_xml(:root => 'results'), 200)
         end
 
         it "should add a request to the Dupe::Network#log" do
@@ -97,7 +100,8 @@ describe Dupe::Network::GetMock do
         it "should convert the array to xml" do
           Dupe.create :author
           mock = Dupe::Network::GetMock.new %r{/authors\.xml$}, proc {Dupe.find :authors}
-          mock.mocked_response('/authors.xml', {}).should == Dupe.find(:authors).to_xml(:root => 'authors')
+          mock.mocked_response('/authors.xml', {}).should ==
+            build_response(Dupe.find(:authors).to_xml(:root => 'authors'), 200)
         end
 
         it "should add a request to the Dupe::Network#log" do
@@ -124,13 +128,15 @@ describe Dupe::Network::GetMock do
           response = proc {|id| Dupe.find(:book) {|b| b.id == id.to_i}}
           book = Dupe.create :book
           mock = Dupe::Network::GetMock.new url_pattern, response
-          mock.mocked_response('/books/1.json', {}).should == book.to_json(:root => 'book')
+          mock.mocked_response('/books/1.json', {}).should ==
+            build_response(book.to_json(:root => 'book'), 200)
 
           proc { mock.mocked_response('/books/2.json', {}) }.should raise_error(Dupe::Network::GetMock::ResourceNotFoundError)
 
           Dupe.define :author
           mock = Dupe::Network::GetMock.new %r{/authors\.json$}, proc {Dupe.find :authors}
-          mock.mocked_response('/authors.json', {}).should == [].to_json(:root => 'results')
+          mock.mocked_response('/authors.json', {}).should ==
+            build_response([].to_json(:root => 'results'), 200)
         end
 
         it "should add a request to the Dupe::Network#log" do
@@ -158,7 +164,8 @@ describe Dupe::Network::GetMock do
         it "should convert the empty array to an json array record set with root 'results'" do
           Dupe.define :author
           mock = Dupe::Network::GetMock.new %r{/authors\.json$}, proc {Dupe.find :authors}
-          mock.mocked_response('/authors.json', {}).should == [].to_json(:root => 'results')
+          mock.mocked_response('/authors.json', {}).should ==
+            build_response([].to_json(:root => 'results'), 200)
         end
 
         it "should add a request to the Dupe::Network#log" do
@@ -174,7 +181,8 @@ describe Dupe::Network::GetMock do
         it "should convert the array to json" do
           Dupe.create :author
           mock = Dupe::Network::GetMock.new %r{/authors\.json$}, proc {Dupe.find :authors}
-          mock.mocked_response('/authors.json', {}).should == Dupe.find(:authors).to_json(:root => 'authors')
+          mock.mocked_response('/authors.json', {}).should ==
+            build_response(Dupe.find(:authors).to_json(:root => 'authors'), 200)
         end
 
         it "should add a request to the Dupe::Network#log" do
@@ -201,9 +209,9 @@ describe Dupe::Network::PostMock do
         it "should convert the new post to xml" do
           Dupe.define :author
           mock = Dupe::Network::PostMock.new %r{/authors\.xml$}, proc {|post_data| Dupe.create(:author, post_data)}
-          resp, url = mock.mocked_response('/authors.xml', {:name => "Rachel"}, {})
-          resp.should == Dupe.find(:authors).first.make_safe.to_xml(:root => 'author')
-          url.should == "/authors/1.xml"
+          mock.mocked_response('/authors.xml', {:name => "Rachel"}, {}).should ==
+            build_response(Dupe.find(:authors).first.make_safe.to_xml(:root => 'author'), 201,
+                           {"Location" => "/authors/1.xml"})
         end
 
         it "should add a request to the Dupe::Network#log" do
@@ -228,9 +236,9 @@ describe Dupe::Network::PostMock do
         it "should convert the new post to json" do
           Dupe.define :author
           mock = Dupe::Network::PostMock.new %r{/authors\.json$}, proc {|post_data| Dupe.create(:author, post_data)}
-          resp, url = mock.mocked_response('/authors.json', {}, {:name => "Rachel"})
-          resp.should == Dupe.find(:authors).first.make_safe.to_json(:root => 'author')
-          url.should == "/authors/1.json"
+          mock.mocked_response('/authors.json', {}, {:name => "Rachel"}).should ==
+            build_response(Dupe.find(:authors).first.make_safe.to_json(:root => 'author'), 201,
+                           {"Location" => "/authors/1.json"})
         end
 
         it "should add a request to the Dupe::Network#log" do
@@ -261,10 +269,9 @@ describe Dupe::Network::PutMock do
         end
 
         it "should convert the put to xml" do
-          resp, url = @mock.mocked_response('/authors/1.xml', {}, {:name => "Rachel"})
-          resp.should == nil
+          @mock.mocked_response('/authors/1.xml', {}, {:name => "Rachel"}).should ==
+            build_response(nil, 204, {"Location" => "/authors/1.xml"})
           @a.name.should == "Rachel"
-          url.should == "/authors/1.xml"
         end
 
         it "should add a request to the Dupe::Network#log" do
@@ -291,10 +298,9 @@ describe Dupe::Network::PutMock do
         end
 
         it "should convert the put to json" do
-          resp, url = @mock.mocked_response('/authors/1.json', {}, {:name => "Rachel"})
-          resp.should == nil
+          @mock.mocked_response('/authors/1.json', {}, {:name => "Rachel"}).should ==
+            build_response(nil, 204, {"Location"  => "/authors/1.json"})
           @a.name.should == "Rachel"
-          url.should == "/authors/1.json"
         end
 
         it "should add a request to the Dupe::Network#log" do
@@ -322,10 +328,10 @@ describe Dupe::Network::DeleteMock do
           @mock = Dupe::Network::DeleteMock.new %r{/authors/(\d+)\.xml$}, proc {|id| Dupe.delete(:author) {|a| a.id == id.to_i}}
         end
 
-        it "should convert the put to xml" do
+        it "should return empty response" do
           Dupe.find(:authors).length.should == 1
-          resp = @mock.mocked_response('/authors/1.xml', {})
-          resp.should == nil
+          resp = @mock.mocked_response('/authors/1.xml', {}).should ==
+            build_response(nil, 200, {})
           Dupe.find(:authors).length.should == 0
         end
 
@@ -354,8 +360,8 @@ describe Dupe::Network::DeleteMock do
 
         it "should convert the put to json" do
           Dupe.find(:authors).length.should == 1
-          resp = @mock.mocked_response('/authors/1.json', {})
-          resp.should == nil
+          @mock.mocked_response('/authors/1.json', {}).should ==
+            build_response(nil, 200, {})
           Dupe.find(:authors).length.should == 0
         end
 

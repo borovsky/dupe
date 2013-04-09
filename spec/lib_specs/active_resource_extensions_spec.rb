@@ -8,7 +8,7 @@ shared_examples "requests processing" do
 
       it "should pass a request off to the Dupe network if the original request failed" do
       Dupe.network.should_receive(:request).with(:get, "/books.#{@format}", {"X-Test" => "42"}).once.
-        and_return(Dupe.find(:books).send("to_#{@format}", :root => 'books'))
+        and_return(ActiveResource::Response.new(Dupe.find(:books).send("to_#{@format}", :root => 'books')))
         books = Book.find(:all)
       end
 
@@ -38,7 +38,8 @@ shared_examples "requests processing" do
       it "should pass a request off to the Dupe network if the original request failed" do
         Dupe.network.should_receive(:request).
           with(:post, "/books.#{@format}", {"X-Test" => "42"},
-                         Hash.from_json(@book.to_json) ).once
+               Hash.from_json(@book.to_json) ).once.
+          and_return(build_response("", 201))
         book = Book.create({:label => 'rooby', :title => 'Rooby'})
       end
 
@@ -102,7 +103,8 @@ shared_examples "requests processing" do
           with(:put, "/books/1.#{@format}", {"X-Test" => "42"},
                Hash.from_xml(@book.merge(:title => "Rails!").
                              to_xml(:root => 'book'))["book"].
-               symbolize_keys!).once.and_return([nil, "/books/1.#{@format}"])
+               symbolize_keys!).once.and_return(build_response(nil, 204,
+                                                               "Location" => "/books/1.#{@format}"))
         @ar_book.title = 'Rails!'
         @ar_book.save
       end
@@ -185,7 +187,9 @@ shared_examples "requests processing" do
       end
 
       it "should pass a request off to the Dupe network if the original request failed" do
-        Dupe.network.should_receive(:request).with(:delete, "/books/1.#{@format}", {"X-Test" => "42"}).once
+        Dupe.network.should_receive(:request).with(:delete, "/books/1.#{@format}",
+                                                   {"X-Test" => "42"}).once.
+          and_return(build_response("", 200, {}))
         @ar_book.destroy
       end
 

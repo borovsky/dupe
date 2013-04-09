@@ -56,12 +56,12 @@ describe Dupe::Network do
 
       it "should return the appropriate mock response if a mock matches the url" do
         @network.define_service_mock :get, %r{/greeting$}, proc { "hello" }
-        @network.request(:get, '/greeting', {}).should == 'hello'
+        @network.request(:get, '/greeting', {}).should == build_response('hello')
 
         @network.define_service_mock :post, %r{/greeting$}, proc { |post_data| Dupe.create(:greeting, post_data) }
-        resp, url = @network.request(:post, '/greeting', {}, {} )
-        resp.should == Dupe.find(:greeting).make_safe.to_xml(:root => 'greeting')
-        url.should == "/greetings/1.xml"
+        @network.request(:post, '/greeting', {}, {} ).should ==
+          build_response(Dupe.find(:greeting).make_safe.to_xml(:root => 'greeting'), 201,
+                         {'Location' => "/greetings/1.xml"})
       end
     end
 
@@ -73,12 +73,12 @@ describe Dupe::Network do
 
       it "should return the appropriate mock response if a mock matches the url" do
         @network.define_service_mock :get, %r{/greeting$}, proc { "hello" }
-        @network.request(:get, '/greeting', {}).should == 'hello'
+        @network.request(:get, '/greeting', {}).should == build_response('hello')
 
         @network.define_service_mock :post, %r{/greeting$}, proc { |post_data| Dupe.create(:greeting, post_data) }
-        resp, url = @network.request(:post, '/greeting', {}, {} )
-        resp.should == Dupe.find(:greeting).make_safe.to_json(:root => 'greeting')
-        url.should == "/greetings/1.json"
+        @network.request(:post, '/greeting', {}, {} ).should ==
+          build_response(Dupe.find(:greeting).make_safe.to_json(:root => 'greeting'), 201,
+                         { "Location" => "/greetings/1.json" })
       end
     end
   end

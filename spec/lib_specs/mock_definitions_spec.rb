@@ -28,7 +28,8 @@ describe "Mock Definition Methods" do
         Dupe.network.mocks[:get].first.should == mock
         Dupe.network.mocks[:get].first.url_pattern.should == %r{/books/([^&]+)\.xml}
         book = Dupe.find(:book)
-        Dupe.network.request(:get, '/books/rooby.xml', {}).should == book.make_safe.to_xml(:root => 'book')
+        Dupe.network.request(:get, '/books/rooby.xml', {}).should ==
+          build_response(book.make_safe.to_xml(:root => 'book'), 200)
       end
     end
 
@@ -55,7 +56,8 @@ describe "Mock Definition Methods" do
         book_post.delete(:id)
         book_response = Dupe.create(:book, {:title => "Rooby", :label => "rooby"})
         Dupe.network.request(:post, '/books.xml', {}, book_post).should ==
-          [Dupe.find(:book) {|b| b.id == 4}.make_safe.to_xml(:root => 'book'), "/books/4.xml"]
+          build_response(Dupe.find(:book) {|b| b.id == 4}.make_safe.to_xml(:root => 'book'), 201,
+                         {"Location" => "/books/4.xml"})
       end
     end
   end
@@ -88,7 +90,7 @@ describe "Mock Definition Methods" do
         Dupe.network.mocks[:get].first.url_pattern.should == %r{/books/([^&]+)\.json}
         book = Dupe.find(:book)
         Dupe.network.request(:get, '/books/rooby.json', {}).should ==
-          book.make_safe.to_json(:root => 'book')
+          build_response(book.make_safe.to_json(:root => 'book'), 200)
       end
     end
 
@@ -115,7 +117,8 @@ describe "Mock Definition Methods" do
         book_post.delete(:id)
         book_response = Dupe.create(:book, {:title => "Rooby", :label => "rooby"})
         Dupe.network.request(:post, '/books.json', {},book_post).should ==
-          [Dupe.find(:book) {|b| b.id == 4}.make_safe.to_json(:root => 'book'), "/books/4.json"]
+          build_response(Dupe.find(:book) {|b| b.id == 4}.make_safe.to_json(:root => 'book'), 201,
+                         {"Location" => "/books/4.json"})
       end
     end
   end
